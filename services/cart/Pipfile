@@ -14,7 +14,6 @@ pytz = "*"
 pytest = "*"
 pytest-asyncio = "*"
 python-jose = {extras=["cryptography"], version = "*"}
-kugel_common = {file = "commons/dist/kugel_common-0.1.9-py3-none-any.whl"}
 
 httpx = "*"
 aiohttp = "*"
@@ -24,6 +23,7 @@ wcwidth = "*"
 debugpy = "*"
 apscheduler = "*"
 
+kugel_common = {file = "commons/dist/kugel_common-0.1.12-py3-none-any.whl"}
 [dev-packages]
 flake8 = "*"
 black = "*"

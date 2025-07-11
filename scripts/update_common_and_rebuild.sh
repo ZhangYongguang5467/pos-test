@@ -63,7 +63,7 @@ fi
 
 # Extract version from filename
 WHEEL_FILENAME=$(basename "$LATEST_WHEEL")
-VERSION=$(echo "$WHEEL_FILENAME" | sed -n 's/kugel_common-\([0-9]\+\.[0-9]\+\.[0-9]\+\)-py3-none-any\.whl/\1/p')
+VERSION=$(echo "$WHEEL_FILENAME" | cut -d'-' -f2)
 
 print_info "Latest kugel_common version: $VERSION"
 print_info "Wheel file: $WHEEL_FILENAME"
@@ -78,12 +78,26 @@ for service in "${SERVICES[@]}"; do
     if [ -f "$PIPFILE" ]; then
         # Check if kugel_common is already in Pipfile
         if grep -q "kugel_common" "$PIPFILE"; then
-            # Update existing entry
-            sed -i "s|kugel_common = {file = \"commons/dist/kugel_common-[0-9.]*-py3-none-any\.whl\"}|kugel_common = {file = \"commons/dist/kugel_common-${VERSION}-py3-none-any.whl\"}|" "$PIPFILE"
+            # Update existing entry - macOS兼容性修复
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                # macOS
+                sed -i '' "s|kugel_common = {file = \"commons/dist/kugel_common-[0-9.]*-py3-none-any\\.whl\"}|kugel_common = {file = \"commons/dist/kugel_common-${VERSION}-py3-none-any.whl\"}|" "$PIPFILE"
+            else
+                # Linux
+                sed -i "s|kugel_common = {file = \"commons/dist/kugel_common-[0-9.]*-py3-none-any\\.whl\"}|kugel_common = {file = \"commons/dist/kugel_common-${VERSION}-py3-none-any.whl\"}|" "$PIPFILE"
+            fi
             print_info "  Updated $service Pipfile with version $VERSION"
         else
-            # Add new entry before [dev-packages] section
-            sed -i "/\[dev-packages\]/i kugel_common = {file = \"commons/dist/kugel_common-${VERSION}-py3-none-any.whl\"}\n" "$PIPFILE"
+            # Add new entry before [dev-packages] section - macOS兼容性修复
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                # macOS
+                sed -i '' "/\\[dev-packages\\]/i\\
+kugel_common = {file = \"commons/dist/kugel_common-${VERSION}-py3-none-any.whl\"}\\
+" "$PIPFILE"
+            else
+                # Linux
+                sed -i "/\\[dev-packages\\]/i kugel_common = {file = \"commons/dist/kugel_common-${VERSION}-py3-none-any.whl\"}" "$PIPFILE"
+            fi
             print_info "  Added kugel_common to $service Pipfile with version $VERSION"
         fi
     else

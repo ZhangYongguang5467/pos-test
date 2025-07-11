@@ -18,7 +18,7 @@ COPY . /app
 
 RUN pip install -U pip && pip install pipenv
 
-RUN pipenv install --deploy --ignore-pipfile --system
+RUN pipenv install --system --skip-lock
 
 EXPOSE 8000
 

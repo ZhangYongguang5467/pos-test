@@ -5,9 +5,6 @@ services:
       context: ./account
       dockerfile: Dockerfile
     image: masakugel/kugelpos.account:latest
-    env_file:
-      - path: ./account/.env
-        required: false
     ports:
       - "8000:8000"
     networks:
@@ -25,9 +22,6 @@ services:
       context: ./terminal
       dockerfile: Dockerfile
     image: masakugel/kugelpos.terminal:latest
-    env_file:
-      - path: ./terminal/.env
-        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -54,9 +48,6 @@ services:
       context: ./master-data
       dockerfile: Dockerfile
     image: masakugel/kugelpos.master-data:latest
-    env_file:
-      - path: ./master-data/.env
-        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -78,9 +69,6 @@ services:
       context: ./cart
       dockerfile: Dockerfile
     image: masakugel/kugelpos.cart:latest
-    env_file:
-      - path: ./cart/.env
-        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -103,9 +91,6 @@ services:
       context: ./report
       dockerfile: Dockerfile
     image: masakugel/kugelpos.report:latest
-    env_file:
-      - path: ./report/.env
-        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -129,9 +114,6 @@ services:
       context: ./journal
       dockerfile: Dockerfile
     image: masakugel/kugelpos.journal:latest
-    env_file:
-      - path: ./journal/.env
-        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -154,9 +136,6 @@ services:
       context: ./stock
       dockerfile: Dockerfile
     image: masakugel/kugelpos.stock:latest
-    env_file:
-      - path: ./stock/.env
-        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token

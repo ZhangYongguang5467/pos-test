@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "5650bf6e6bdcc98c8bc54db8ec55a476c856874347fc7c01f32928a28f84f5da"
+            "sha256": "9db71791e4c4d33688d3c2ce9e716a57d8941ad84e787508d1de9ea7d0d8f0f2"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -349,12 +349,12 @@
         },
         "fastapi": {
             "hashes": [
-                "sha256:6c0c8bf9420bd58f565e585036d971872472b4f7d3f6c73b698e10cffdefb3ca",
-                "sha256:b1de15cdc1c499a4da47914db35d0e4ef8f1ce62b624e94e0e5824421df99739"
+                "sha256:80dc0794627af0390353a6d1171618276616310d37d24faba6648398e57d687a",
+                "sha256:fdcc9ed272eaef038952923bef2b735c02372402d1203ee1210af4eea7a78d2b"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==0.115.14"
+            "version": "==0.116.0"
         },
         "frozenlist": {
             "hashes": [
@@ -508,9 +508,9 @@
             "version": "==2.1.0"
         },
         "kugel-common": {
-            "file": "commons/dist/kugel_common-0.1.9-py3-none-any.whl",
+            "file": "commons/dist/kugel_common-0.1.11-py3-none-any.whl",
             "hashes": [
-                "sha256:8fd56d8ec07bf42a3ac30f699fc772420b194dedb9508b34f4ff77e947d4e9ac"
+                "sha256:afda787ce95d068bf749309395af4fd35ea864ff733f4d5ad49538474a3f25f7"
             ]
         },
         "lxml": {
@@ -1179,11 +1179,11 @@
         },
         "typing-extensions": {
             "hashes": [
-                "sha256:8676b788e32f02ab42d9e7c61324048ae4c6d844a399eebace3d4979d75ceef4",
-                "sha256:a1514509136dd0b477638fc68d6a91497af5076466ad0fa6c338e44e359944af"
+                "sha256:38b39f4aeeab64884ce9f74c94263ef78f3c22467c8724005483154c26648d36",
+                "sha256:d1e1e3b58374dc93031d6eda2420a48ea44a36c2b4766a4fdeb3710755731d76"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==4.14.0"
+            "version": "==4.14.1"
         },
         "typing-inspection": {
             "hashes": [
@@ -1465,11 +1465,11 @@
         },
         "typing-extensions": {
             "hashes": [
-                "sha256:8676b788e32f02ab42d9e7c61324048ae4c6d844a399eebace3d4979d75ceef4",
-                "sha256:a1514509136dd0b477638fc68d6a91497af5076466ad0fa6c338e44e359944af"
+                "sha256:38b39f4aeeab64884ce9f74c94263ef78f3c22467c8724005483154c26648d36",
+                "sha256:d1e1e3b58374dc93031d6eda2420a48ea44a36c2b4766a4fdeb3710755731d76"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==4.14.0"
+            "version": "==4.14.1"
         }
     }
 }

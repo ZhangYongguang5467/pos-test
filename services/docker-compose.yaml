@@ -1,10 +1,9 @@
-
 services:
   account:
     build:
       context: ./account
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.account:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-account:latest
     ports:
       - "8000:8000"
     networks:
@@ -21,7 +20,7 @@ services:
     build:
       context: ./terminal
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.terminal:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-terminal:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -47,7 +46,7 @@ services:
     build:
       context: ./master-data
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.master-data:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-master-data:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -68,7 +67,7 @@ services:
     build:
       context: ./cart
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.cart:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-cart:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -90,7 +89,7 @@ services:
     build:
       context: ./report
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.report:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-report:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -113,7 +112,7 @@ services:
     build:
       context: ./journal
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.journal:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-journal:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -135,7 +134,7 @@ services:
     build:
       context: ./stock
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.stock:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-stock:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -155,7 +154,7 @@ services:
       start_period: 40s
 
   dapr_account:
-    image: daprio/daprd:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-daprd:latest
     command: ["./daprd", "-app-id", "account", "-app-port", "8000", "-dapr-http-port", "3500", "-config", "/dapr/config.yaml", "-components-path", "./dapr/components"]
     depends_on:
       - account
@@ -166,7 +165,7 @@ services:
     network_mode: "service:account"
 
   dapr_terminal:
-    image: daprio/daprd:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-daprd:latest
     command: ["./daprd", "-app-id", "terminal", "-app-port", "8000", "-dapr-http-port", "3500", "-config", "/dapr/config.yaml", "-components-path", "./dapr/components"]
     depends_on:
       - terminal
@@ -177,7 +176,7 @@ services:
     network_mode: "service:terminal"
 
   dapr_master_data:
-    image: daprio/daprd:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-daprd:latest
     command: ["./daprd", "-app-id", "master-data", "-app-port", "8000", "-dapr-http-port", "3500", "-config", "/dapr/config.yaml", "-components-path", "./dapr/components"]
     depends_on:
       - master-data
@@ -188,7 +187,7 @@ services:
     network_mode: "service:master-data"
 
   dapr_cart:
-    image: daprio/daprd:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-daprd:latest
     command: ["./daprd", "-app-id", "cart", "-app-port", "8000", "-dapr-http-port", "3500", "-config", "/dapr/config.yaml", "-components-path", "./dapr/components"]
     depends_on:
       - cart
@@ -201,7 +200,7 @@ services:
       - DAPR_PUBSUB_NAME=pubsub
 
   dapr_report:
-    image: daprio/daprd:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-daprd:latest
     command: ["./daprd", "-app-id", "report", "-app-port", "8000", "-dapr-http-port", "3500", "-config", "/dapr/config.yaml", "-components-path", "./dapr/components"]
     depends_on:
       - report
@@ -212,7 +211,7 @@ services:
     network_mode: "service:report"
 
   dapr_journal:
-    image: daprio/daprd:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-daprd:latest
     command: ["./daprd", "-app-id", "journal", "-app-port", "8000", "-dapr-http-port", "3500", "-config", "/dapr/config.yaml", "-components-path", "./dapr/components"]
     depends_on:
       - journal
@@ -223,7 +222,7 @@ services:
     network_mode: "service:journal"
 
   dapr_stock:
-    image: daprio/daprd:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-daprd:latest
     command: ["./daprd", "-app-id", "stock", "-app-port", "8000", "-dapr-http-port", "3500", "-config", "/dapr/config.yaml", "-components-path", "./dapr/components"]
     depends_on:
       - stock
@@ -234,13 +233,13 @@ services:
     network_mode: "service:stock"
 
   redis:
-    image: redis:latest
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-redis:latest
     container_name: redis
     networks:
       - kugelpos_net
 
   mongodb:
-    image: mongo:7.0
+    image: registry.cn-beijing.aliyuncs.com/trechina/aipos-mongo:latest
     container_name: mongodb
     hostname: mongodb
     ports:

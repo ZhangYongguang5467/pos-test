@@ -63,16 +63,29 @@ update_compose_with_digest() {
     
     echo "Updating $service with digest: $digest"
     
-    # Use sed to replace the image line
-    sed -i.bak "s|image: $NAMESPACE/pos-$service:latest|image: $NAMESPACE/pos-$service@$digest|g" "$COMPOSE_FILE"
-    sed -i.bak "s|image: $NAMESPACE/pos-$service@sha256:[a-f0-9]*|image: $NAMESPACE/pos-$service@$digest|g" "$COMPOSE_FILE"
+    # Use sed to replace the image line (Linux/macOS compatible)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i .bak "s|image: $NAMESPACE/pos-$service:latest|image: $NAMESPACE/pos-$service@$digest|g" "$COMPOSE_FILE"
+        sed -i .bak "s|image: $NAMESPACE/pos-$service@sha256:[a-f0-9]*|image: $NAMESPACE/pos-$service@$digest|g" "$COMPOSE_FILE"
+    else
+        # Linux
+        sed -i.bak "s|image: $NAMESPACE/pos-$service:latest|image: $NAMESPACE/pos-$service@$digest|g" "$COMPOSE_FILE"
+        sed -i.bak "s|image: $NAMESPACE/pos-$service@sha256:[a-f0-9]*|image: $NAMESPACE/pos-$service@$digest|g" "$COMPOSE_FILE"
+    fi
 }
 
 # Function to revert to latest tags
 revert_to_latest() {
     echo "Reverting all images to :latest tags..."
     for service in "${SERVICES[@]}"; do
-        sed -i.bak "s|image: $NAMESPACE/pos-$service@sha256:[a-f0-9]*|image: $NAMESPACE/pos-$service:latest|g" "$COMPOSE_FILE"
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            sed -i .bak "s|image: $NAMESPACE/pos-$service@sha256:[a-f0-9]*|image: $NAMESPACE/pos-$service:latest|g" "$COMPOSE_FILE"
+        else
+            # Linux
+            sed -i.bak "s|image: $NAMESPACE/pos-$service@sha256:[a-f0-9]*|image: $NAMESPACE/pos-$service:latest|g" "$COMPOSE_FILE"
+        fi
     done
     echo "Reverted to :latest tags"
 }

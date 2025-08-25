@@ -110,6 +110,9 @@ jobs:
       run: |
         SERVICES="account terminal master-data cart report journal stock"
         
+        # Initialize digest environment file
+        echo "# Docker image digests" > /tmp/digests.env
+        
         # Build and push each service
         for service in $SERVICES; do
           echo "🚀 Building and pushing $service..."
@@ -139,53 +142,78 @@ jobs:
           
           # Build and push image with better error handling
           echo "🔨 Building Docker image for $service..."
+          
+          # Build with explicit output format to avoid OCI issues
           if docker buildx build \
             --platform linux/amd64 \
-            --push \
-            --tag ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/pos-$service:latest \
+            --output type=image,name=${{ env.REGISTRY }}/${{ env.NAMESPACE }}/pos-$service:latest,push=true \
             ./services/$service; then
-            echo "✅ Successfully built $service"
+            echo "✅ Successfully built and pushed $service"
           else
             echo "❌ Failed to build $service"
             exit 1
           fi
             
-          # Get the digest with retry
+          # Wait a moment for the image to be available
+          sleep 10
+          
+          # Get the digest using docker manifest inspect (more reliable)
           echo "📋 Getting digest for $service..."
           DIGEST=""
           for attempt in 1 2 3; do
-            DIGEST=$(docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/pos-$service:latest --format '{{.Manifest.Digest}}' 2>/dev/null || echo "")
-            if [ -n "$DIGEST" ]; then
+            echo "  尝试 $attempt: 获取 $service 的摘要..."
+            
+            # Use docker manifest inspect instead of buildx imagetools
+            DIGEST=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/pos-$service:latest 2>/dev/null | jq -r '.digest // empty' 2>/dev/null || echo "")
+            
+            if [ -n "$DIGEST" ] && [ "$DIGEST" != "null" ] && [ "$DIGEST" != "" ]; then
+              echo "  ✅ 获取到摘要: $DIGEST"
               break
             fi
-            echo "⏳ Attempt $attempt failed, retrying in 5 seconds..."
+            
+            echo "  ⏳ 尝试 $attempt 失败，5秒后重试..."
             sleep 5
           done
           
-          if [ -z "$DIGEST" ]; then
-            echo "❌ Failed to get digest for $service"
+          if [ -z "$DIGEST" ] || [ "$DIGEST" = "null" ]; then
+            echo "❌ Failed to get digest for $service after 3 attempts"
             exit 1
           fi
           
-          # Save digest to output
-          echo "${service//-/_}_digest=$DIGEST" >> $GITHUB_OUTPUT
+          # Save digest to both GitHub output and temporary file
+          DIGEST_VAR="${service//-/_}_digest"
+          ENV_VAR_NAME=$(echo "$service" | tr '[:lower:]-' '[:upper:]_')_DIGEST
+          
+          echo "$DIGEST_VAR=$DIGEST" >> "$GITHUB_OUTPUT"
+          echo "${ENV_VAR_NAME}=$DIGEST" >> /tmp/digests.env
+          
           echo "✅ Built $service with digest: $DIGEST"
         done
         
     - name: Update docker-compose.yaml with SHA256 digests
       run: |
-        # Set environment variables for the update script
-        export ACCOUNT_DIGEST="${{ steps.build-images.outputs.account_digest }}"
-        export TERMINAL_DIGEST="${{ steps.build-images.outputs.terminal_digest }}"
-        export MASTER_DATA_DIGEST="${{ steps.build-images.outputs.master_data_digest }}"
-        export CART_DIGEST="${{ steps.build-images.outputs.cart_digest }}"
-        export REPORT_DIGEST="${{ steps.build-images.outputs.report_digest }}"
-        export JOURNAL_DIGEST="${{ steps.build-images.outputs.journal_digest }}"
-        export STOCK_DIGEST="${{ steps.build-images.outputs.stock_digest }}"
+        echo "📋 Reading digest values from previous step..."
         
-        # Run the update script
-        chmod +x ./scripts/update_compose_digests.sh
-        ./scripts/update_compose_digests.sh --use-env
+        # Read digests from a temporary file instead of GitHub outputs
+        if [ -f "/tmp/digests.env" ]; then
+          source /tmp/digests.env
+          
+          echo "Found digests:"
+          echo "  ACCOUNT_DIGEST=$ACCOUNT_DIGEST"
+          echo "  TERMINAL_DIGEST=$TERMINAL_DIGEST"  
+          echo "  MASTER_DATA_DIGEST=$MASTER_DATA_DIGEST"
+          echo "  CART_DIGEST=$CART_DIGEST"
+          echo "  REPORT_DIGEST=$REPORT_DIGEST"
+          echo "  JOURNAL_DIGEST=$JOURNAL_DIGEST"
+          echo "  STOCK_DIGEST=$STOCK_DIGEST"
+          
+          # Run the update script
+          chmod +x ./scripts/update_compose_digests.sh
+          ./scripts/update_compose_digests.sh --use-env
+        else
+          echo "❌ No digest file found at /tmp/digests.env"
+          exit 1
+        fi
         
     - name: Commit and push updated docker-compose.yaml
       run: |
@@ -198,16 +226,19 @@ jobs:
         if git diff --staged --quiet; then
           echo "No changes to commit"
         else
+          # Source the digest values for commit message
+          source /tmp/digests.env
+          
           git commit -m "chore: update docker-compose.yaml with latest image SHA256 digests" \
                      -m "" \
                      -m "🤖 Generated by GitHub Actions" \
                      -m "" \
-                     -m "- account: ${{ steps.build-images.outputs.account_digest }}" \
-                     -m "- terminal: ${{ steps.build-images.outputs.terminal_digest }}" \
-                     -m "- master-data: ${{ steps.build-images.outputs.master_data_digest }}" \
-                     -m "- cart: ${{ steps.build-images.outputs.cart_digest }}" \
-                     -m "- report: ${{ steps.build-images.outputs.report_digest }}" \
-                     -m "- journal: ${{ steps.build-images.outputs.journal_digest }}" \
-                     -m "- stock: ${{ steps.build-images.outputs.stock_digest }}"
+                     -m "- account: $ACCOUNT_DIGEST" \
+                     -m "- terminal: $TERMINAL_DIGEST" \
+                     -m "- master-data: $MASTER_DATA_DIGEST" \
+                     -m "- cart: $CART_DIGEST" \
+                     -m "- report: $REPORT_DIGEST" \
+                     -m "- journal: $JOURNAL_DIGEST" \
+                     -m "- stock: $STOCK_DIGEST"
           git push
         fi

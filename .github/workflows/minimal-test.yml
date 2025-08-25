@@ -1,0 +1,62 @@
+name: Minimal Test
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: docker.io
+  NAMESPACE: zyg5467
+
+jobs:
+  minimal-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check environment
+      run: |
+        echo "🔍 Environment check..."
+        echo "Current directory: $(pwd)"
+        echo "User: $(whoami)"
+        echo "Docker version: $(docker --version)"
+        echo "Available disk space: $(df -h)"
+        
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: Test Docker login
+      run: |
+        echo "🔐 Testing Docker Hub connection..."
+        docker info | grep -E "(Username|Registry)" || true
+        echo "✅ Docker login successful"
+        
+    - name: Simple Docker test
+      run: |
+        echo "🐳 Running simple Docker test..."
+        
+        # Test with a simple dockerfile
+        mkdir -p /tmp/test-docker
+        cat > /tmp/test-docker/Dockerfile << 'EOF'
+        FROM python:3.12-slim
+        RUN echo "Hello from test container"
+        CMD ["echo", "Test successful"]
+        EOF
+        
+        echo "📋 Building test image..."
+        docker build -t ${{ env.NAMESPACE }}/test:latest /tmp/test-docker
+        
+        echo "🚀 Pushing test image..."  
+        docker push ${{ env.NAMESPACE }}/test:latest
+        
+        echo "📋 Getting digest..."
+        DIGEST=$(docker manifest inspect ${{ env.NAMESPACE }}/test:latest | jq -r '.digest')
+        echo "Test image digest: $DIGEST"
+        
+        echo "✅ Basic Docker operations working!"

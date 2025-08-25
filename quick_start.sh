@@ -50,6 +50,13 @@ if ! command -v hatch &> /dev/null; then
         exit 1
     fi
     
+    # Add user bin directory to PATH if hatch was installed there
+    USER_BIN_DIR="$HOME/Library/Python/3.9/bin"
+    if [ -d "$USER_BIN_DIR" ] && [ -f "$USER_BIN_DIR/hatch" ]; then
+        echo "Adding $USER_BIN_DIR to PATH..."
+        export PATH="$USER_BIN_DIR:$PATH"
+    fi
+    
     # Verify installation
     if ! command -v hatch &> /dev/null; then
         echo "Error: hatch installation failed!"

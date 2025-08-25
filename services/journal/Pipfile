@@ -22,7 +22,7 @@ lxml = "*"
 wcwidth = "*"
 debugpy = "*"
 
-kugel_common = {file = "commons/dist/kugel_common-0.1.12-py3-none-any.whl"}
+kugel_common = {file = "commons/dist/kugel_common-0.1.14-py3-none-any.whl"}
 [dev-packages]
 flake8 = "*"
 black = "*"

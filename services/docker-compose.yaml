@@ -4,7 +4,7 @@ services:
     build:
       context: ./account
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.account:latest
+    image: zyg5467/pos-account:latest
     ports:
       - "8000:8000"
     networks:
@@ -21,7 +21,7 @@ services:
     build:
       context: ./terminal
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.terminal:latest
+    image: zyg5467/pos-terminal:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -47,7 +47,7 @@ services:
     build:
       context: ./master-data
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.master-data:latest
+    image: zyg5467/pos-master-data:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -68,7 +68,7 @@ services:
     build:
       context: ./cart
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.cart:latest
+    image: zyg5467/pos-cart:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -90,7 +90,7 @@ services:
     build:
       context: ./report
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.report:latest
+    image: zyg5467/pos-report:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -113,7 +113,7 @@ services:
     build:
       context: ./journal
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.journal:latest
+    image: zyg5467/pos-journal:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -135,7 +135,7 @@ services:
     build:
       context: ./stock
       dockerfile: Dockerfile
-    image: masakugel/kugelpos.stock:latest
+    image: zyg5467/pos-stock:latest
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token

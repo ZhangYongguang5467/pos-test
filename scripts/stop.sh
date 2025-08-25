@@ -12,10 +12,10 @@ cd "$PROJECT_ROOT/services" || exit 1
 # Check for --clean flag
 if [ "$1" == "--clean" ]; then
     echo "Stopping all Kugelpos services and removing volumes..."
-    docker-compose down -v
+    docker compose down -v
     echo "Services stopped and data volumes removed."
 else
     echo "Stopping all Kugelpos services..."
-    docker-compose down
+    docker compose down
     echo "Services stopped successfully."
 fi

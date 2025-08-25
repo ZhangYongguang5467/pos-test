@@ -8,8 +8,8 @@ cd "$PROJECT_ROOT"
 
 echo "Starting Kugelpos services..."
 
-# Docker compose is now in services directory
-COMPOSE_CMD="docker-compose -f $PROJECT_ROOT/services/docker-compose.yaml -f $PROJECT_ROOT/services/docker-compose.override.yaml"
+# Docker compose is now in services directory - use docker compose (v2) instead of docker-compose (v1)
+COMPOSE_CMD="docker compose -f $PROJECT_ROOT/services/docker-compose.yaml -f $PROJECT_ROOT/services/docker-compose.override.yaml"
 
 # Check if MongoDB is already running
 if $COMPOSE_CMD ps mongodb | grep -q "Up"; then
@@ -24,7 +24,7 @@ else
     # Check if replica set needs initialization
     if ! docker exec mongodb mongosh --quiet --eval "rs.status().ok" 2>/dev/null | grep -q "1"; then
         echo "Initializing MongoDB replica set..."
-        docker-compose -f $PROJECT_ROOT/services/docker-compose.yaml -f $PROJECT_ROOT/services/docker-compose.mongodb-init.yaml up mongodb-init
+        docker compose -f $PROJECT_ROOT/services/docker-compose.yaml -f $PROJECT_ROOT/services/docker-compose.mongodb-init.yaml up mongodb-init
     else
         echo "MongoDB replica set already initialized"
     fi
@@ -53,5 +53,5 @@ echo "  Report API: http://localhost:8004/docs"
 echo "  Journal API: http://localhost:8005/docs"
 echo "  Stock API: http://localhost:8006/docs"
 echo ""
-echo "To view logs: cd services && docker-compose logs -f [service-name]"
-echo "To stop: cd services && docker-compose down"
+echo "To view logs: cd services && docker compose logs -f [service-name]"
+echo "To stop: cd services && docker compose down"

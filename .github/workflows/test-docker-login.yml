@@ -10,18 +10,26 @@ jobs:
     steps:
     - name: Debug secrets
       run: |
-        echo "DOCKERHUB_USERNAME is set: ${{ secrets.DOCKERHUB_USERNAME != '' }}"
-        echo "DOCKERHUB_TOKEN is set: ${{ secrets.DOCKERHUB_TOKEN != '' }}"
+        if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+          echo "DOCKERHUB_USERNAME is set: YES"
+        else
+          echo "DOCKERHUB_USERNAME is set: NO"
+        fi
+        if [ -n "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+          echo "DOCKERHUB_TOKEN is set: YES"
+        else
+          echo "DOCKERHUB_TOKEN is set: NO"
+        fi
         
     - name: Log in to Docker Hub
-      if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+      if: ${{ secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN }}
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         
     - name: Test Docker login
-      if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+      if: ${{ secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN }}
       run: |
         echo "Login successful!"
         docker info

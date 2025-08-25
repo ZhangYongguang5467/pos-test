@@ -47,23 +47,63 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install hatch
         
-    - name: Build commons library
+    - name: Build and distribute commons library  
       run: |
-        cd services/commons
-        if [ -f "run_build.sh" ]; then
-          chmod +x run_build.sh
-          ./run_build.sh
+        echo "🔨 Building commons library using project build scripts..."
+        
+        # Step 1: Build commons using run_build_common.sh
+        if [ -f "./scripts/run_build_common.sh" ]; then
+          echo "📋 Building commons package..."
+          chmod +x ./scripts/run_build_common.sh
+          ./scripts/run_build_common.sh
+        else
+          echo "❌ run_build_common.sh not found"
+          exit 1
         fi
         
-    - name: Copy commons to all services
-      run: |
-        cd services/commons
-        if [ -f "run_copy.sh" ]; then
-          chmod +x run_copy.sh
-          for service in account terminal master-data cart report journal stock; do
-            ./run_copy.sh $service
-          done
+        # Step 2: Copy commons to all services using run_copy_common.sh
+        if [ -f "./scripts/run_copy_common.sh" ]; then
+          echo "📋 Copying commons to all services..."
+          chmod +x ./scripts/run_copy_common.sh
+          ./scripts/run_copy_common.sh
+        else
+          echo "❌ run_copy_common.sh not found"
+          exit 1
         fi
+        
+        # Step 3: Update Pipfiles with new version
+        echo "📋 Updating service Pipfiles with new commons version..."
+        COMMONS_DIST_DIR="./services/commons/dist"
+        LATEST_WHEEL=$(ls -t "$COMMONS_DIST_DIR"/kugel_common-*-py3-none-any.whl 2>/dev/null | head -n 1)
+        
+        if [ -n "$LATEST_WHEEL" ]; then
+          WHEEL_FILENAME=$(basename "$LATEST_WHEEL")
+          VERSION=$(echo "$WHEEL_FILENAME" | cut -d'-' -f2)
+          echo "  Latest version: $VERSION"
+          
+          # Update each service's Pipfile
+          SERVICES=(account terminal master-data cart report journal stock)
+          for service in "${SERVICES[@]}"; do
+            PIPFILE="./services/$service/Pipfile"
+            if [ -f "$PIPFILE" ]; then
+              # Update Pipfile with new version
+              sed -i "s|kugel_common = {file = \"commons/dist/kugel_common-[0-9.]*-py3-none-any\\.whl\"}|kugel_common = {file = \"commons/dist/kugel_common-${VERSION}-py3-none-any.whl\"}|" "$PIPFILE"
+              echo "  ✅ Updated $service Pipfile"
+            fi
+          done
+        else
+          echo "❌ No commons wheel file found"
+          exit 1
+        fi
+        
+        echo "📋 Verifying commons distribution:"
+        for service in account terminal master-data cart report journal stock; do
+          if [ -d "./services/$service/commons/dist" ]; then
+            echo "  ✅ $service: $(ls -la ./services/$service/commons/dist/ | wc -l) files"
+          else
+            echo "  ❌ $service: commons/dist directory not found"
+          fi
+        done
         
     - name: Build and push all Docker images
       id: build-images
@@ -72,21 +112,64 @@ jobs:
         
         # Build and push each service
         for service in $SERVICES; do
-          echo "Building and pushing $service..."
+          echo "🚀 Building and pushing $service..."
           
-          # Build and push image
-          docker buildx build \
+          # Check if service directory exists
+          if [ ! -d "./services/$service" ]; then
+            echo "❌ Service directory ./services/$service not found"
+            exit 1
+          fi
+          
+          echo "📂 Contents of ./services/$service:"
+          ls -la ./services/$service
+          
+          # Check if commons is available
+          if [ -d "./services/$service/commons/dist" ]; then
+            echo "✅ Commons found for $service:"
+            ls -la ./services/$service/commons/dist/
+          else
+            echo "⚠️  No commons dist found for $service"
+          fi
+          
+          # Check if Dockerfile exists
+          if [ ! -f "./services/$service/Dockerfile" ]; then
+            echo "❌ Dockerfile not found for $service"
+            exit 1
+          fi
+          
+          # Build and push image with better error handling
+          echo "🔨 Building Docker image for $service..."
+          if docker buildx build \
             --platform linux/amd64 \
             --push \
             --tag ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/pos-$service:latest \
-            ./services/$service
+            ./services/$service; then
+            echo "✅ Successfully built $service"
+          else
+            echo "❌ Failed to build $service"
+            exit 1
+          fi
             
-          # Get the digest
-          DIGEST=$(docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/pos-$service:latest --format '{{.Manifest.Digest}}')
+          # Get the digest with retry
+          echo "📋 Getting digest for $service..."
+          DIGEST=""
+          for attempt in 1 2 3; do
+            DIGEST=$(docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/pos-$service:latest --format '{{.Manifest.Digest}}' 2>/dev/null || echo "")
+            if [ -n "$DIGEST" ]; then
+              break
+            fi
+            echo "⏳ Attempt $attempt failed, retrying in 5 seconds..."
+            sleep 5
+          done
+          
+          if [ -z "$DIGEST" ]; then
+            echo "❌ Failed to get digest for $service"
+            exit 1
+          fi
           
           # Save digest to output
           echo "${service//-/_}_digest=$DIGEST" >> $GITHUB_OUTPUT
-          echo "Built $service with digest: $DIGEST"
+          echo "✅ Built $service with digest: $DIGEST"
         done
         
     - name: Update docker-compose.yaml with SHA256 digests

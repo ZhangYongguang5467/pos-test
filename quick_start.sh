@@ -14,7 +14,11 @@ echo "Environment variables set: SECRET_KEY, PUBSUB_NOTIFY_API_KEY"
 # Step 0: Clean up orphaned containers
 echo "Step 0: Cleaning up orphaned containers..."
 cd services
-docker-compose down --remove-orphans 2>/dev/null || true
+if command -v docker-compose &> /dev/null; then
+    docker-compose down --remove-orphans 2>/dev/null || true
+elif docker compose version &> /dev/null; then
+    docker compose down --remove-orphans 2>/dev/null || true
+fi
 cd ..
 
 # Step 1: Set execute permission for make_scripts_executable.sh and run it
@@ -35,37 +39,45 @@ fi
 
 # Step 2a: Check and install hatch if needed
 echo "Step 2a: Checking for hatch..."
+
+# Add common Python user bin directories to PATH for this session
+USER_PYTHON_BIN="$HOME/Library/Python/3.9/bin"
+if [ -d "$USER_PYTHON_BIN" ] && [[ ":$PATH:" != *":$USER_PYTHON_BIN:"* ]]; then
+    export PATH="$USER_PYTHON_BIN:$PATH"
+fi
+
+# Check for hatch again
 if ! command -v hatch &> /dev/null; then
     echo "hatch not found. Installing hatch..."
     
     # Try to install using pip (preferred method)
     if command -v pip &> /dev/null; then
         echo "Installing hatch using pip..."
-        pip install hatch
+        pip install --user hatch
     elif command -v pip3 &> /dev/null; then
         echo "Installing hatch using pip3..."
-        pip3 install hatch
+        pip3 install --user hatch
     else
         echo "Error: pip is not available. Please install pip first."
         exit 1
     fi
     
-    # Add user bin directory to PATH if hatch was installed there
-    USER_BIN_DIR="$HOME/Library/Python/3.9/bin"
-    if [ -d "$USER_BIN_DIR" ] && [ -f "$USER_BIN_DIR/hatch" ]; then
-        echo "Adding $USER_BIN_DIR to PATH..."
-        export PATH="$USER_BIN_DIR:$PATH"
+    # Update PATH again after installation
+    if [ -d "$USER_PYTHON_BIN" ] && [[ ":$PATH:" != *":$USER_PYTHON_BIN:"* ]]; then
+        export PATH="$USER_PYTHON_BIN:$PATH"
     fi
     
     # Verify installation
     if ! command -v hatch &> /dev/null; then
         echo "Error: hatch installation failed!"
+        echo "Tried to find hatch in: $USER_PYTHON_BIN"
+        echo "Current PATH: $PATH"
         exit 1
     else
         echo "hatch successfully installed!"
     fi
 else
-    echo "hatch is already installed."
+    echo "hatch is already available."
 fi
 
 # Step 2b: Build and distribute kugel_common (includes pipenv rebuild)

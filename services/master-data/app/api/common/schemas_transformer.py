@@ -16,6 +16,10 @@ from app.api.common.schemas import (
     BaseItemBookTab,
     BaseItemBookButton,
     BaseTaxMasterResponse,
+    BaseCategoryDiscountMasterResponse,
+    BaseDiscountStoreMasterResponse,
+    BaseCategoryDiscountDetailResponse,
+
 )
 from app.models.documents.item_common_master_document import ItemCommonMasterDocument
 from app.models.documents.item_store_master_document import ItemStoreMasterDocument
@@ -23,6 +27,9 @@ from app.models.documents.item_store_detail_document import ItemStoreDetailDocum
 from app.models.documents.payment_master_document import PaymentMasterDocument
 from app.models.documents.settings_master_document import SettingsMasterDocument
 from app.models.documents.category_master_document import CategoryMasterDocument
+from app.models.documents.category_discount_master_document import CategoryDiscountMasterDocument
+from app.models.documents.discount_store_master_document import DiscountStoreMasterDocument
+from app.models.documents.category_discount_detail_document import CategoryDiscountDetailDocument
 from app.models.documents.item_book_master_document import (
     ItemBookMasterDocument,
     ItemBookCategory,
@@ -202,3 +209,62 @@ class SchemasTransformer:
 
         logger.debug(f"return_tax: {return_tax}")
         return return_tax
+    
+    def transform_category_discount_master(
+        self, category_discount_doc: CategoryDiscountMasterDocument
+    ) -> BaseCategoryDiscountMasterResponse:
+        return BaseCategoryDiscountMasterResponse(
+            category_code=category_discount_doc.category_code,
+            store_code=category_discount_doc.store_code,
+            discount_code=category_discount_doc.discount_code,
+            description=category_discount_doc.description,
+            entry_datetime=category_discount_doc.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            if category_discount_doc.created_at
+            else None,
+            last_update_datetime=(
+                category_discount_doc.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+                if category_discount_doc.updated_at
+                else None
+            ),
+        )
+    
+    def transform_discount_store_master(
+        self, discount_store_doc: DiscountStoreMasterDocument
+    ) -> BaseDiscountStoreMasterResponse:
+        return BaseDiscountStoreMasterResponse(
+            store_code=discount_store_doc.store_code,
+            discount_code=discount_store_doc.discount_code,
+            discount_value=discount_store_doc.discount_value,
+            description=discount_store_doc.description,
+            entry_datetime=discount_store_doc.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            if discount_store_doc.created_at
+            else None,
+            last_update_datetime=(
+                discount_store_doc.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+                if discount_store_doc.updated_at
+                else None
+            ),
+        )
+    
+    def transform_category_discount_detail(
+        self, category_discount_detail_doc: CategoryDiscountDetailDocument
+    ) -> BaseCategoryDiscountDetailResponse:
+        return BaseCategoryDiscountDetailResponse(
+            category_code=category_discount_detail_doc.category_code,
+            store_code=category_discount_detail_doc.store_code,
+            discount_code=category_discount_detail_doc.discount_code,
+            discount_value=category_discount_detail_doc.discount_value,
+            description=category_discount_detail_doc.description,
+            entry_datetime=category_discount_detail_doc.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            if category_discount_detail_doc.created_at
+            else None,
+            last_update_datetime=(
+                category_discount_detail_doc.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+                if category_discount_detail_doc.updated_at
+                else None
+            ),
+        )   
+    
+
+    
+

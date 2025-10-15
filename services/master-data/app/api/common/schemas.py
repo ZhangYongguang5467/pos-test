@@ -622,3 +622,71 @@ class BaseTaxMasterResponse(BaseSchemaModel):
     round_method: Optional[str] = None
     entry_datetime: Optional[str] = None
     last_update_datetime: Optional[str] = None
+
+class BaseDiscountStoreMasterResponse(BaseSchemaModel):
+    """
+    Base Discount Store Category Master Document Schema
+
+    Defines fields for discount store category documents.
+    Includes discount code, discount value, description, tenant ID,
+    creation datetime, and last update datetime.
+    """
+    store_code: str
+    discount_code: str
+    discount_value: float
+    description: Optional[str] = None
+class BaseDiscountStoreMasterUpdateRequest(BaseSchemaModel):
+    """
+    Base Discount Store Category Master Update Request Schema
+
+    Defines fields required for updating an existing discount store record.
+    Includes description, store code, and discount value.
+    Discount code is obtained from the URL path.
+    """
+
+    description: Optional[str] = None
+    store_code: str
+    discount_value: float
+
+class BaseCategoryDiscountMasterResponse(BaseSchemaModel):
+    """
+    Base Category Discount Master Document Schema
+
+    Defines fields for category discount documents.
+    Includes category code, description, discount code, tenant ID,
+    creation datetime, and last update datetime.
+    """
+
+    category_code: str
+    store_code: str
+    description: Optional[str] = None
+    discount_code: str
+
+class BaseCategoryDiscountMasterUpdateRequest(BaseSchemaModel):
+    """
+    Base Category Discount Master Update Request Schema
+
+    Defines fields required for updating an existing category discount record.
+    Includes description, store code, and discount code.
+    Category code is obtained from the URL path.
+    """
+
+    description: Optional[str] = None
+    store_code: str
+    discount_code: str
+
+class BaseCategoryDiscountDetailResponse(BaseSchemaModel):
+    """
+    Base Category Discount Detail Document Schema
+
+    Defines fields for category discount detail documents.
+    Includes category code, store code, discount code, discount value,
+    description, and short description.
+    """
+
+    category_code: Optional[str] = None
+    store_code: Optional[str] = None
+    discount_code: Optional[str] = None
+    discount_value: Optional[float]= None
+    description: Optional[str] = None
+    description_short: Optional[str] = None

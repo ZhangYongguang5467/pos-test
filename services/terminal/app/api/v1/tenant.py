@@ -80,7 +80,7 @@ async def create_tenant(
         # setup database for other services
         urls = []
         urls.append(f"{settings.BASE_URL_MASTER_DATA}/tenants")
-        urls.append(f"{settings.BASE_URL_CART}/tenants")
+        # urls.append(f"{settings.BASE_URL_CART}/tenants")
         urls.append(f"{settings.BASE_URL_REPORT}/tenants")
         urls.append(f"{settings.BASE_URL_JOURNAL}/tenants")
         urls.append(f"{settings.BASE_URL_STOCK}/tenants")

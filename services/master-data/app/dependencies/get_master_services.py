@@ -18,6 +18,8 @@ from app.services.payment_master_service import PaymentMasterService
 from app.services.settings_master_service import SettingsMasterService
 from app.services.staff_master_service import StaffMasterService
 from app.services.tax_master_service import TaxMasterService
+from app.services.discount_store_master_service import DiscountStoreMasterService
+from app.services.category_discount_master_service import CategoryDiscountMasterService
 
 from app.models.repositories.category_master_repository import CategoryMasterRepository
 from app.models.repositories.item_book_master_repository import ItemBookMasterRepository
@@ -27,6 +29,8 @@ from app.models.repositories.payment_master_repository import PaymentMasterRepos
 from app.models.repositories.settings_master_repository import SettingsMasterRepository
 from app.models.repositories.staff_master_repository import StaffMasterRepository
 from app.models.repositories.tax_master_repository import TaxMasterRepository
+from app.models.repositories.discount_store_master_repository import DiscountStoreMasterRepository
+from app.models.repositories.category_discount_master_repository import CategoryDiscountMasterRepository
 
 logger = getLogger(__name__)
 
@@ -47,6 +51,7 @@ async def get_category_master_service_async(tenant_id: str) -> CategoryMasterSer
     logger.debug(f"get_category_master_service_async: tenant_id->{tenant_id}")
     db = await db_helper.get_db_async(f"{settings.DB_NAME_PREFIX}_{tenant_id}")
     return CategoryMasterService(category_master_repo=CategoryMasterRepository(db, tenant_id))
+    #return CategoryMasterService(category_master_repo=CategoryMasterRepository(db, tenant_id),discount_store_master_repo=DiscountStoreMasterRepository(db, tenant_id))
 
 
 async def get_item_book_service_async(tenant_id: str, store_code: str = None) -> ItemBookMasterService:
@@ -186,4 +191,41 @@ async def get_tax_master_service_async(tenant_id: str) -> TaxMasterService:
     """
     logger.debug(f"get_tax_master_service_async: tenant_id->{tenant_id}")
     db = await db_helper.get_db_async(f"{settings.DB_NAME_PREFIX}_{tenant_id}")
-    return TaxMasterService(tax_master_repo=TaxMasterRepository(db, tenant_id))
+    return TaxMasterService(tax_master_repo=TaxMasterRepository(db, tenant_id)) 
+
+async def get_discount_store_master_service_async(tenant_id: str) -> DiscountStoreMasterService:
+    """
+    Dependency function to create and inject a DiscountStoreMasterService instance.
+
+    This function creates the necessary repository and injects it into the service,
+    providing access to the tenant-specific database for discount store operations.
+
+    Args:
+        tenant_id: The tenant identifier used to select the appropriate database
+
+    Returns:
+        DiscountStoreMasterService: Configured service instance for the specified tenant
+    """
+    logger.debug(f"get_discount_store_master_service_async: tenant_id->{tenant_id}")
+    db = await db_helper.get_db_async(f"{settings.DB_NAME_PREFIX}_{tenant_id}")
+    return DiscountStoreMasterService(discount_store_master_repo=DiscountStoreMasterRepository(db, tenant_id))
+
+async def get_category_discount_master_service_async(tenant_id: str) -> CategoryDiscountMasterService:
+    """
+    Dependency function to create and inject a CategoryDiscountMasterService instance.
+
+    This function creates the necessary repository and injects it into the service,
+    providing access to the tenant-specific database for category discount operations.
+
+    Args:
+        tenant_id: The tenant identifier used to select the appropriate database
+
+    Returns:
+        CategoryDiscountMasterService: Configured service instance for the specified tenant
+    """
+    logger.debug(f"get_category_discount_master_service_async: tenant_id->{tenant_id}")
+    db = await db_helper.get_db_async(f"{settings.DB_NAME_PREFIX}_{tenant_id}")
+    return CategoryDiscountMasterService(
+        category_discount_master_repo=CategoryDiscountMasterRepository(db, tenant_id),
+        discount_store_master_repo=DiscountStoreMasterRepository(db, tenant_id)
+    )

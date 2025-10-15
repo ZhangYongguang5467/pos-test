@@ -51,7 +51,7 @@ class Settings(
 
     # Override required fields with defaults
     MONGODB_URI: str = Field(default="mongodb://localhost:27017/?replicaSet=rs0")
-    DB_NAME_PREFIX: str = Field(default="db_terminal")
+    DB_NAME_PREFIX: str = Field(default="db_common")
 
     model_config = SettingsConfigDict(
         env_file=".env",  # Load settings from .env file

@@ -51,6 +51,13 @@ from app.api.common.schemas import (
     BaseItemBookTabDeleteResponse,
     BaseItemBookButtonDeleteResponse,
     BaseTaxMasterResponse,
+    BaseDiscountStoreMasterResponse,
+    BaseCategoryDiscountMasterResponse,
+    BaseCategoryDiscountDetailResponse,
+    BaseCategoryDiscountMasterUpdateRequest,
+    BaseDiscountStoreMasterUpdateRequest,
+
+    
 )
 
 # Staff related schema definitions
@@ -520,3 +527,113 @@ class TaxMasterResponse(BaseTaxMasterResponse):
     """
 
     pass
+
+# Discount master related schema definitions
+class  DiscountStoreMasterCreateRequest(BaseDiscountStoreMasterResponse):
+    """
+    Discount Store Category Master Creation Request Schema
+
+    Contains discount code, discount value, description, and other information
+    used to create a new discount store category record.
+    """
+
+    pass
+
+class DiscountStoreMasterUpdateRequest(BaseDiscountStoreMasterUpdateRequest):
+    """
+    Discount Store Category Master Update Request Schema
+
+    Used to update an existing discount store category record.
+    Contains discount value, description, and other information.
+    """
+
+    pass
+
+class DiscountStoreMasterDeleteResponse(BaseDiscountStoreMasterResponse):
+    """
+    Discount Store Category Master Delete Response Schema
+
+    Used to return the result of a discount store category deletion operation.
+    Contains the code of the deleted discount store category.
+    """
+
+    pass
+
+class DiscountStoreMasterResponse(BaseDiscountStoreMasterResponse):
+    """
+    Discount Store Category Master Response Schema
+
+    Defines the response format for discount store category data from the API.
+    Contains discount code, discount value, description, and other information.
+    """
+
+    pass
+
+
+# Category Discount master related schema definitions
+
+class CategoryDiscountMasterCreateRequest(BaseCategoryDiscountMasterResponse):
+    """
+    Category Discount Master Creation Request Schema
+
+    Contains category code, description, discount code, and other information
+    used to create a new category discount record.
+    """
+
+    pass
+
+
+class CategoryDiscountMasterUpdateRequest(BaseCategoryDiscountMasterUpdateRequest):
+    """
+    Category Discount Master Update Request Schema
+
+    Used to update an existing category discount record.
+    Contains description, discount code, and other information.
+    """
+
+    pass
+
+
+class CategoryDiscountMasterDeleteResponse(BaseCategoryDiscountMasterResponse):
+    """
+    Category Discount Master Delete Response Schema
+
+    Used to return the result of a category discount deletion operation.
+    Contains the code of the deleted category discount.
+    """
+
+    pass
+
+class CategoryDiscountMasterResponse(BaseCategoryDiscountMasterResponse):
+    """
+    Category Discount Master Response Schema
+
+    Defines the response format for category discount data from the API.
+    Contains category code, description, discount code, and other information.
+    """
+
+    pass
+
+# Category Discount master detail related schema definitions
+class CategoryDiscountDetailResponse(BaseCategoryDiscountDetailResponse):
+    """
+    Category Discount Detail Response Schema
+
+    Defines the response format for detailed category discount data from the API.
+    Contains category code, store code, discount code, discount value, description,
+    and other information.
+    """
+
+    pass
+
+class CategoryDiscountDetailRequest(BaseCategoryDiscountDetailResponse):
+    """
+    Category Discount Detail Request Schema
+
+    Contains category code, store code, discount code, and other information
+    used to retrieve detailed category discount data.
+    """
+
+    pass
+
+

@@ -12,7 +12,7 @@ class CartSettings(BaseSettings):
     UNDELIVERED_CHECK_FAILED_PERIOD_IN_MINUTES: int = 15
 
     # debug mode
-    DEBUG: str = "false"
+    DEBUG: str = "false"  # Enable/disable debug mode ("true"/"false")
     # This port is used for debugging purposes
     DEBUG_PORT: int = 5678
 

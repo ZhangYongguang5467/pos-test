@@ -4,7 +4,10 @@ services:
     build:
       context: ./account
       dockerfile: Dockerfile
-    image: zyg5467/pos-account:latest
+    image: masakugel/kugelpos.account:latest
+    env_file:
+      - path: ./account/.env
+        required: false
     ports:
       - "8000:8000"
     networks:
@@ -21,7 +24,10 @@ services:
     build:
       context: ./terminal
       dockerfile: Dockerfile
-    image: zyg5467/pos-terminal:latest
+    image: masakugel/kugelpos.terminal:latest
+    env_file:
+      - path: ./terminal/.env
+        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -47,7 +53,10 @@ services:
     build:
       context: ./master-data
       dockerfile: Dockerfile
-    image: zyg5467/pos-master-data:latest
+    image: masakugel/kugelpos.master-data:latest
+    env_file:
+      - path: ./master-data/.env
+        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -68,7 +77,10 @@ services:
     build:
       context: ./cart
       dockerfile: Dockerfile
-    image: zyg5467/pos-cart:latest
+    image: masakugel/kugelpos.cart:latest
+    env_file:
+      - path: ./cart/.env
+        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -90,7 +102,10 @@ services:
     build:
       context: ./report
       dockerfile: Dockerfile
-    image: zyg5467/pos-report:latest
+    image: masakugel/kugelpos.report:latest
+    env_file:
+      - path: ./report/.env
+        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -113,7 +128,10 @@ services:
     build:
       context: ./journal
       dockerfile: Dockerfile
-    image: zyg5467/pos-journal:latest
+    image: masakugel/kugelpos.journal:latest
+    env_file:
+      - path: ./journal/.env
+        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token
@@ -135,7 +153,10 @@ services:
     build:
       context: ./stock
       dockerfile: Dockerfile
-    image: zyg5467/pos-stock:latest
+    image: masakugel/kugelpos.stock:latest
+    env_file:
+      - path: ./stock/.env
+        required: false
     environment:
       - BASE_URL_DAPR=http://localhost:3500/v1.0
       - TOKEN_URL=http://localhost:3500/v1.0/invoke/account/method/api/v1/accounts/token

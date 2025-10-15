@@ -19,7 +19,7 @@ class TerminalSettings(BaseSettings):
     """
 
     # Debugging configuration
-    DEBUG: str = "false"  # Enable/disable debug mode ("true"/"false")
+    DEBUG: str = "true"  # Enable/disable debug mode ("true"/"false")
     DEBUG_PORT: int = 5678  # Port for debugpy remote debugging
 
     # Undelivered message republish settings

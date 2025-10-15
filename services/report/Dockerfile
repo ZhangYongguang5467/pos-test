@@ -16,15 +16,9 @@ WORKDIR /app
 
 COPY . /app
 
-# Configure pip for better network reliability
 RUN pip install -U pip && pip install pipenv
-ENV PIP_DEFAULT_TIMEOUT=300
-ENV PIP_RETRIES=10
 
-# Add retry mechanism for pipenv install to handle network issues
-RUN pipenv install --system --skip-lock || \
-    (echo "First attempt failed, retrying..." && sleep 5 && pipenv install --system --skip-lock) || \
-    (echo "Second attempt failed, retrying with longer timeout..." && sleep 10 && pipenv install --system --skip-lock)
+RUN pipenv install --deploy --ignore-pipfile --system
 
 EXPOSE 8000
 

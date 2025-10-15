@@ -6,6 +6,7 @@ from typing import Optional
 
 from kugel_common.schemas.api_response import ApiResponse
 from kugel_common.status_codes import StatusCodes
+from kugel_common.security import api_key_header, oauth2_scheme, get_terminal_info, get_current_user
 
 from app.api.v1.schemas_transformer import SchemasTransformerV1
 from app.api.v1.schemas import *
@@ -17,6 +18,9 @@ from app.dependencies.get_terminal_service import (
     get_tenant_id_with_security_by_query_optional_wrapper,
     get_tenant_id_for_pubsub_notification,
 )
+
+from kugel_common.config.settings import settings
+from kugel_common.database import database as db_helper
 
 router = APIRouter()
 logger = getLogger(__name__)
@@ -63,6 +67,15 @@ async def create_terminal(terminal: TerminalCreateRequest, tenant_id: str = Depe
             store_code=terminal.store_code, terminal_no=terminal.terminal_no, description=terminal.description
         )  # tenant_id is known
         return_json = SchemasTransformerV1().transform_terminal(terminal_info).model_dump()
+
+        logger.debug(f"get_terminal_info_for_terminal_service: terminal_id: {terminal_id}, api_key: ********")
+        tenant_id = "00001"
+        db = await db_helper.get_db_async(f"{settings.DB_NAME_PREFIX}_{tenant_id}")
+        collection = db.get_collection(settings.DB_COLLECTION_NAME_TERMINAL_INFO)
+        terminal_dict =  await collection.find_one({"terminal_id": terminal_id})
+        logger.debug(f"TerminalInfo: {terminal_dict}")
+        print("*************TerminalInfo*************************************************************")
+        
     except Exception as e:
         raise e
 

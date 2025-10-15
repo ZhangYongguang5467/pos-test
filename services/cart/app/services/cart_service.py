@@ -12,12 +12,15 @@ from kugel_common.enums import TaxType
 
 from app.exceptions import (
     ServiceException,
+    CartCannotCreateException,
     CartCannotSaveException,
     CartNotFoundException,
     NotFoundException,
     ItemNotFoundException,
     StrategyPluginException,
     BalanceZeroException,
+    BalanceMinusException,
+    DepositOverException,
     BalanceGreaterThanZeroException,
     TerminalStatusException,
     SignInOutException,
@@ -36,6 +39,10 @@ from app.models.repositories.settings_master_web_repository import (
     SettingsMasterWebRepository,
 )
 from app.models.documents.cart_document import CartDocument
+# from app.models.repositories.discount_store_master_repository import DiscountStoreMasterRepository
+# from app.models.repositories.category_discount_master_repository import CategoryDiscountMasterRepository  
+from app.models.repositories.category_discount_detail_web_repository import CategoryDiscountDetailWebRepository
+
 from app.enums.terminal_status import TerminalStatus
 from app.services.cart_service_interface import ICartService
 from app.services.cart_state_manager import CartStateManager
@@ -79,6 +86,7 @@ class CartService(ICartService):
         item_master_repo: ItemMasterWebRepository,
         payment_master_repo: PaymentMasterWebRepository,
         store_info_repo: StoreInfoWebRepository,
+        category_discount_detail_repo: CategoryDiscountDetailWebRepository,
         tran_service: TranService,
         cart_id: str = None,
     ) -> None:
@@ -106,13 +114,15 @@ class CartService(ICartService):
         self.payment_master_repo = payment_master_repo
         self.store_info_repo = store_info_repo
         self.tran_service = tran_service
+        
 
         self.cart_id = cart_id
         self.current_cart = None
 
         self.state_manager = CartStateManager()
         self.strategy_manager = CartStrategyManager()
-
+        self.category_discount_detail_repo = category_discount_detail_repo
+        
         try:
             # Load sales promotion strategy plugins
             self.sales_promo_strategies = self.strategy_manager.load_strategies("sales_promo_strategies")
@@ -213,10 +223,10 @@ class CartService(ICartService):
                 item_master=item_master,
             )
             if cart is None:
-                raise Exception("Failed to create cart")
+                raise Exception("failed to create cart, cart is None")
         except Exception as e:
             message = f"Failed to create cart, transaction_type: {transaction_type}, user_id: {user_id}, user_name: {user_name}"
-            raise CartCannotSaveException(message, logger, e) from e
+            raise CartCannotCreateException(message, logger, e) from e
 
         # Save to cache
         await self.__cache_cart_async(cart_doc=cart, cart_status=CartStatus.Idle, isNew=True)
@@ -308,6 +318,17 @@ class CartService(ICartService):
                 message = f"Item not found: item_code->{add_item['item_code']}"
                 raise ItemNotFoundException(message, logger, e) from e
 
+            # Get the category discount for this product (if any)
+            discount_rate = 0.0
+            try:
+                category_discount_detail = await self.category_discount_detail_repo.get_category_discount_detail_by_code_async(item.category_code)
+                if category_discount_detail is not None and category_discount_detail.discount_value is not None:
+                    discount_rate = category_discount_detail.discount_value/100  # e.g., 0.1 means 10% off      ==
+                    logger.info(f"Found discount for category_code {item.category_code}: {discount_rate*100}% off")
+            except NotFoundException as e:
+                logger.debug(f"No discount found for category_code {item.category_code}")
+                raise ItemNotFoundException(message, logger, e) from e
+            
             logger.info(f"item: {item}")
             cart_item = CartDocument.CartLineItem()
             cart_item.line_no = len(cart_doc.line_items) + 1
@@ -315,15 +336,35 @@ class CartService(ICartService):
             cart_item.category_code = item.category_code
             cart_item.description = item.description
             cart_item.description_short = item.description_short
-            unit_price = add_item["unit_price"]
+            # unit_price = add_item["unit_price"]
+            unit_price = item.unit_price  #"Get the unit price of the product from the product master table
+            cart_item.unit_price_original = unit_price  # Store original unit price
             # Use store price or unit price from item master if no price is specified
             if not unit_price:
                 if item.store_price:
                     unit_price = item.store_price
                 else:
                     unit_price = item.unit_price
+
+             # Apply category discount
+            if discount_rate > 0:
+                unit_price = unit_price * (1 - discount_rate)
+                cart_item.is_unit_price_changed = True
+                
+                # discount_info_class = getattr(CartDocument, "DiscountInfo")
+                discount_new = CartDocument.DiscountInfo(
+                    seq_no=cart_item.line_no,
+                    discount_type="DiscountPercentage",
+                    discount_value=discount_rate*100,
+                    discount_amount=cart_item.unit_price_original - unit_price,
+                    detail="部門割引",
+                )
+                cart_item.discounts.append(discount_new)
+                cart_item.discounts_allocated.append(discount_new)
+
             cart_item.unit_price = unit_price
             cart_item.quantity = add_item["quantity"]
+
             # cart_item.amount = cart_item.unit_price * cart_item.quantity
             cart_item.tax_code = item.tax_code
             cart_item.is_discount_restricted = item.is_discount_restricted
@@ -596,6 +637,9 @@ class CartService(ICartService):
                 cart_doc = await pay_strategy.pay(
                     cart_doc, add_payment["payment_code"], add_payment["amount"], add_payment["detail"]
                 )
+            except (BalanceZeroException, BalanceMinusException, DepositOverException) as e:
+                # Re-raise business logic exceptions as-is
+                raise e
             except Exception as e:
                 message = f"Failed to pay, payment_code: {add_payment['payment_code']}, amount: {add_payment['amount']}"
                 raise ServiceException(message, logger, e) from e

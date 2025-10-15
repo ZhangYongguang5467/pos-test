@@ -35,8 +35,12 @@ async def calc_line_item_async(line_item: CartDocument.CartLineItem) -> CartDocu
     for discount in line_item.discounts:
         if discount.discount_type == DiscountType.DiscountPercentage.value:
             # Calculate target amount after previous discounts
+            # target_amount = (
+            #     Decimal(line_item.unit_price) * Decimal(line_item.quantity)
+            #     - sum(Decimal(discount.discount_amount) for discount in line_item.discounts)
+            # ) / Decimal(line_item.quantity)
             target_amount = (
-                Decimal(line_item.unit_price) * Decimal(line_item.quantity)
+                Decimal(line_item.unit_price_original) * Decimal(line_item.quantity)
                 - sum(Decimal(discount.discount_amount) for discount in line_item.discounts)
             ) / Decimal(line_item.quantity)
             # Apply percentage discount
@@ -51,7 +55,7 @@ async def calc_line_item_async(line_item: CartDocument.CartLineItem) -> CartDocu
 
     # Calculate final amount (unit price × quantity - all discounts)
     line_item.amount = float(
-        Decimal(line_item.unit_price) * Decimal(line_item.quantity)
+        Decimal(line_item.unit_price_original) * Decimal(line_item.quantity)
         - sum(Decimal(discount.discount_amount) for discount in line_item.discounts)
     )
 

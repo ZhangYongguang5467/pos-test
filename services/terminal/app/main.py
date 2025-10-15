@@ -6,6 +6,12 @@ from fastapi.exception_handlers import RequestValidationError
 from logging import getLogger, config
 import platform
 import os
+import debugpy
+
+# 监听 5678 端口，VSCode launch.json 要匹配
+# debugpy.listen(("0.0.0.0", 5678))
+# print("Waiting for debugger attach...")  # 终端会显示这行，表示 debugpy 已启动
+# debugpy.wait_for_client()  # 可选：程序会暂停，直到 VSCode 附加
 
 # Load logging configuration from the config file
 logging_conf_path = os.path.join(os.path.dirname(__file__), "logging.conf")
@@ -28,19 +34,30 @@ from app.cron.republish_undelivery_message import (
     shutdown_republish_undelivered_terminallog_job,
     scheduler as republish_scheduler,
 )
+from kugel_common.security import (
+    get_terminal_info_for_terminal_service
+)
+# import debugpy
+# # 监听 5678 端口，VSCode launch.json 要匹配
+# debugpy.listen(("0.0.0.0", 5678))
+# print("Waiting for debugger attach...")  # 终端会显示这行，表示 debugpy 已启动
+# debugpy.wait_for_client()  # 可选：程序会暂停，直到 VSCode 附加
 
-# Create a FastAPI instance with API documentation URLs configured
 app = FastAPI(docs_url="/docs", redoc_url="/redoc")
 
-# Enable remote debugging if DEBUG environment variable is set to "true"  # This allows attaching a debugger to the running application
-IS_DEBUG = settings.DEBUG.lower() == "true"
-if IS_DEBUG:
-    import debugpy
 
-    debug_port = settings.DEBUG_PORT
-    debugpy.listen(("0.0.0.0", debug_port))
-    logger.debug(f"Debugging enabled on port {debug_port}")
-    debugpy.wait_for_client()
+
+# Enable remote debugging if DEBUG environment variable is set to "true"  # This allows attaching a debugger to the running application
+
+
+# IS_DEBUG = settings.DEBUG.lower() == "true"
+# if IS_DEBUG:
+#     import debugpy
+
+#     debug_port = settings.DEBUG_PORT
+#     debugpy.listen(("0.0.0.0", debug_port))
+#     logger.debug(f"Debugging enabled on port {debug_port}")
+#     debugpy.wait_for_client()
 
 
 # Include the API routers with versioned prefixes  # This enables API versioning and proper routing of requests

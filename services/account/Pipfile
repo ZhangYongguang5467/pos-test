@@ -15,7 +15,7 @@ pytest = "*"
 pytest-asyncio = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}
-
+kugel_common = {file = "commons/dist/kugel_common-0.1.16-py3-none-any.whl"}
 bcrypt = "==3.2.0"
 python-multipart = "*"
 httpx = "*"
@@ -25,7 +25,6 @@ wcwidth = "*"
 debugpy = "*"
 aiohttp = "*"
 
-kugel_common = {file = "commons/dist/kugel_common-0.1.14-py3-none-any.whl"}
 [dev-packages]
 flake8 = "*"
 black = "*"

@@ -243,6 +243,7 @@ class ReceiptDataSample(AbstractReceiptData[BaseTransaction]):
                 tax_mark = "  "
 
         # description, amount, tax_mark
+        # amount = line_item.amount + sum([discount.discount_amount for discount in line_item.discounts])
         amount = line_item.amount + sum([discount.discount_amount for discount in line_item.discounts])
         left_str = line_item.description
         right_str = self.comma(amount) + tax_mark

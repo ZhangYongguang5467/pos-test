@@ -83,6 +83,9 @@ async def __get_cart_service_async(terminal_info: TerminalInfoDocument, cart_id:
     from app.models.repositories.item_master_web_repository import (
         ItemMasterWebRepository,
     )
+    from app.models.repositories.category_discount_detail_web_repository import (
+        CategoryDiscountDetailWebRepository,
+    )
     from app.models.repositories.payment_master_web_repository import (
         PaymentMasterWebRepository,
     )
@@ -114,6 +117,13 @@ async def __get_cart_service_async(terminal_info: TerminalInfoDocument, cart_id:
         store_code=terminal_info.store_code,
         terminal_info=terminal_info,
     )
+    category_discount_detail_repo = CategoryDiscountDetailWebRepository(
+        tenant_id=tenant_id,
+        store_code=terminal_info.store_code,
+        terminal_info=terminal_info,
+        category_code="",  # Placeholder, actual category code will be used in method calls
+    )
+    
     payment_master_repo = PaymentMasterWebRepository(tenant_id=tenant_id, terminal_info=terminal_info)
     settings_master_repo = SettingsMasterWebRepository(
         tenant_id=tenant_id,
@@ -142,6 +152,7 @@ async def __get_cart_service_async(terminal_info: TerminalInfoDocument, cart_id:
         tax_master_repo=tax_master_repo,
         item_master_repo=item_master_repo,
         payment_master_repo=payment_master_repo,
+        category_discount_detail_repo=category_discount_detail_repo,
         tran_service=tran_service,
         cart_id=cart_id,
     )

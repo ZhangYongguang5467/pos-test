@@ -21,6 +21,7 @@ The API is RESTful and uses JSON for data exchange. All endpoints return a stand
 ApiResponse object which includes success status, data, and error information when applicable.
 """
 
+import debugpy
 from fastapi import FastAPI, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -28,6 +29,11 @@ from fastapi.exceptions import RequestValidationError
 from logging import getLogger, config
 import platform
 import os
+
+# 监听 5678 端口，VSCode launch.json 要匹配
+# debugpy.listen(("0.0.0.0", 5678))
+# print("Waiting for debugger attach...")  # 终端会显示这行，表示 debugpy 已启动
+# debugpy.wait_for_client()  # 可选：程序会暂停，直到 VSCode 附加
 
 # Load logging configuration from the specified file
 logging_conf_path = os.path.join(os.path.dirname(__file__), "logging.conf")
@@ -53,6 +59,8 @@ from app.api.v1.settings_master import router as v1_settings_master_router
 from app.api.v1.category_master import router as v1_category_master_router
 from app.api.v1.tenant import router as v1_tenant_router
 from app.api.v1.tax_master import router as v1_tax_master_router
+from app.api.v1.category_discount_master import router as v1_category_discount_master_router
+from app.api.v1.discount_store_master import router as v1_discount_store_master_router
 from app.config.settings import settings
 
 # Create a FastAPI instance with API documentation URLs enabled
@@ -97,6 +105,14 @@ app.include_router(
 app.include_router(
     v1_settings_master_router, prefix="/api/v1", tags=["Settings Master"]
 )  # System settings configuration
+
+app.include_router(
+    v1_category_discount_master_router, prefix="/api/v1", tags=["Category Discount Master"] 
+)# Category discount configuration (category-based discounts)
+
+app.include_router(
+    v1_discount_store_master_router, prefix="/api/v1", tags=["Discount Store Master"]
+)  # Discount store configuration (store-based discounts)
 
 app.include_router(
     v1_category_master_router, prefix="/api/v1", tags=["Category Master"]
